@@ -4,7 +4,7 @@ ENV HERMES_HOME=/opt/data
 
 # Install proxy deps
 COPY requirements-proxy.txt /tmp/requirements-proxy.txt
-RUN pip install --no-cache-dir -r /tmp/requirements-proxy.txt && chmod +x /tmp/requirements-proxy.txt
+RUN python3 -m pip install --no-cache-dir -r /tmp/requirements-proxy.txt
 
 # Copy files
 COPY bai_proxy.py /opt/bai_proxy.py

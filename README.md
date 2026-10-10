@@ -1,46 +1,39 @@
-# B.AI Agent
+# bai-agent
 
-Hermes Agent + B.AI rotating proxy (5000+ API keys).
+Hermes Agent + Telegram bot, siap deploy di Railway.
 
-## Features
-- Auto-rotate API keys (401/429 → switch key)
-- Provider switching via `provider.conf`
-- Supports B.AI, MiMo, Fireworks
-- Telegram bot included
+## Deploy ke Railway
 
-## Quick Start
+1. Deploy repo ini dari GitHub.
+2. Tambah Volume dan mount ke `/opt/data` (supaya sesi, memory, dan config tidak hilang tiap redeploy).
+3. Isi Variables:
 
-### Railway
-1. Fork this repo
-2. Deploy to Railway
-3. Set `TELEGRAM_BOT_TOKEN` env var
-4. Done
+| Variable | Wajib | Isi |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | ya | API key endpoint LLM |
+| `OPENAI_BASE_URL` | ya | Base URL endpoint, contoh `https://host/v1` |
+| `HERMES_MODEL` | ya | Nama model persis seperti di endpoint, contoh `DeepSeek-V4-Pro` |
+| `TELEGRAM_BOT_TOKEN` | ya | Token dari @BotFather |
+| `TELEGRAM_ALLOWED_USERS` | disarankan | User ID Telegram yang boleh pakai bot |
+| `TELEGRAM_HOME_CHANNEL` | disarankan | User ID kamu sendiri |
+| `HERMES_API_MODE` | tidak | Default `chat_completions`. Ganti hanya kalau endpoint mendukung mode lain |
+| `HERMES_DASHBOARD` | tidak | `1` untuk WebUI (butuh basic auth) |
 
-### Docker
-```bash
+`bootstrap.sh` menyinkronkan config Hermes dengan variable di atas setiap kali container start.
+
+## Jangan commit rahasia
+
+API key, token bot, dan token Railway hanya boleh ada di Variables Railway, tidak di repo.
+
+## Docker lokal
+
+```
 docker build -t bai-agent .
-docker run -e TELEGRAM_BOT_TOKEN=xxx bai-agent
-```
-
-## Switch Provider
-
-Edit `provider.conf`:
-```
-PROVIDER_NAME=bai      # bai / mimo / fireworks
-```
-
-## API Key Status
-Check `http://localhost:4000/health` for proxy status.
-
-## Files
-```
-├── bai_proxy.py          ← Rotating proxy (5000+ keys)
-├── bai_apikeys.txt       ← B.AI API keys
-├── provider.conf         ← Provider config (editable)
-├── bootstrap.sh          ← Startup script
-├── AGENTS.md             ← Agent behavior prompt
-├── Dockerfile            ← Railway/Docker build
-├── docker-compose.yml    ← Local Docker setup
-├── railway.toml          ← Railway config
-└── requirements-proxy.txt
+docker run --rm \
+  -e OPENAI_API_KEY=... \
+  -e OPENAI_BASE_URL=https://host/v1 \
+  -e HERMES_MODEL=DeepSeek-V4-Pro \
+  -e TELEGRAM_BOT_TOKEN=... \
+  -v hermes_data:/opt/data \
+  bai-agent
 ```
